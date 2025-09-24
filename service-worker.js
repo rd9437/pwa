@@ -2,8 +2,7 @@ const CACHE_NAME = 'neostream-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/style.css',
-  '/script.js',
+
   '/assets/logo-1.png',
   // Add more assets or pages as needed
 ];
@@ -32,3 +31,4 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
