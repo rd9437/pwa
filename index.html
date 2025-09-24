@@ -119,9 +119,9 @@
     <div class="tagline">Fast • Clean • Free • Movies • TV • K-Drama</div>
     <h1>Stream Without the Clutter</h1>
     <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
-    <div class="buttons" id="buttons">
-      <a href="https://neostream.free.nf" id="enterBtn">Enter Neostream</a>
-      <a href="#" id="installBtn">Download App</a>
+    <div class="buttons">
+      <a href="https://neostream.free.nf">Enter Neostream</a>
+      <a href="#">Download App</a>
     </div>
   </div>
 
@@ -159,69 +159,6 @@
     }
 
     loadPosters();
-
-    // PWA Install Logic
-
-    let deferredPrompt = null;
-    const installBtn = document.getElementById('installBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Show install button
-      installBtn.style.display = 'inline-block';
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-        installBtn.style.display = 'none';
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-      deferredPrompt = null;
-    });
-
-    // Detect if app is installed
-    function checkIfInstalled() {
-      // For iOS Safari
-      const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-      // For other browsers
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-      return isInStandaloneMode || isStandalone;
-    }
-
-    function updateButtons() {
-      const isInstalled = checkIfInstalled();
-
-      if (isInstalled) {
-        // Hide download button
-        installBtn.style.display = 'none';
-      } else {
-        // Show download button only if beforeinstallprompt fired
-        if (deferredPrompt) {
-          installBtn.style.display = 'inline-block';
-        } else {
-          installBtn.style.display = 'none';
-        }
-      }
-    }
-
-    window.addEventListener('appinstalled', () => {
-      console.log('App installed');
-      installBtn.style.display = 'none';
-    });
-
-    // Initial check on load
-    window.addEventListener('load', () => {
-      updateButtons();
-    });
-
   </script>
 </body>
 </html>
