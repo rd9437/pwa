@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>Neostream</title>
+  <title>Neosteam</title>
   <meta property="og:description" content="Watch movies and webseries for free without sign up!" />
   <meta property="og:title" content="Neostream" />
   <meta property="og:image" content="https://neostream.free.nf/assets/og.png" />
@@ -14,7 +14,7 @@
 
   <link rel="icon" href="https://neostream.free.nf/assets/logo-1.png" type="image/png" />
   <!-- PWA Manifest -->
-  <link rel="manifest" href="/mysite/manifest.json" />
+  <link rel="manifest" href="/pwa/manifest.json" />
   <meta name="theme-color" content="#6c47ff" />
 
   <!-- Register Service Worker for PWA -->
@@ -22,7 +22,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         navigator.serviceWorker
-          .register('/mysite/service-worker.js')
+          .register('/pwa/service-worker.js')
           .then(function (registration) {
             console.log('ServiceWorker registration successful with scope: ', registration.scope);
           })
