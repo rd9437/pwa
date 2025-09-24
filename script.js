@@ -74,34 +74,6 @@ window.addEventListener('DOMContentLoaded', () => {
   installBtn.style.gap = '8px';
   installBtn.style.marginLeft = '12px'; // space from Enter Neostream
 
-  // Add text span
-  const btnText = document.createElement('span');
-  btnText.textContent = 'Install App';
-  installBtn.appendChild(btnText);
-
-  // Add small cross button
-  const closeBtn = document.createElement('span');
-  closeBtn.textContent = '✕';
-  closeBtn.style.fontSize = '13px';
-  closeBtn.style.marginLeft = '10px';
-  closeBtn.style.cursor = 'pointer';
-  closeBtn.style.background = 'rgba(0,0,0,0.12)';
-  closeBtn.style.borderRadius = '50%';
-  closeBtn.style.width = '18px';
-  closeBtn.style.height = '18px';
-  closeBtn.style.display = 'inline-flex';
-  closeBtn.style.alignItems = 'center';
-  closeBtn.style.justifyContent = 'center';
-  closeBtn.style.color = '#fff';
-  closeBtn.style.position = 'relative';
-  closeBtn.style.top = '-1px';
-  closeBtn.setAttribute('title', 'Dismiss');
-  closeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    installBtn.style.display = 'none';
-  });
-  installBtn.appendChild(closeBtn);
-
   // Append the button to the .buttons div next to Enter Neostream
   const buttonsDiv = document.querySelector('.buttons');
   if (buttonsDiv) {
