@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Neostream</title>
+  <title>Ntream</title>
   <style>
     * {
       box-sizing: border-box;
@@ -132,20 +132,14 @@
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
     async function fetchPosters() {
-      try {
-        const res = await fetch(`${BASE_URL}/trending/movie/week`, {
-          headers: {
-            Authorization: API_KEY,
-            accept: 'application/json'
-          }
-        });
-        if (!res.ok) throw new Error('Failed to fetch posters');
-        const data = await res.json();
-        return data.results;
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
+      const res = await fetch(`${BASE_URL}/trending/movie/week`, {
+        headers: {
+          Authorization: API_KEY,
+          accept: 'application/json'
+        }
+      });
+      const data = await res.json();
+      return data.results;
     }
 
     async function loadPosters() {
@@ -165,6 +159,8 @@
       });
     }
 
+    loadPosters();
+
     // PWA install logic
     let deferredPrompt;
     const downloadBtn = document.getElementById('downloadBtn');
@@ -173,12 +169,12 @@
     // Hide download button initially
     downloadBtn.style.display = 'none';
 
-    // Function to check if the app is installed or not
+    // Check if the app is already installed
     function isAppInstalled() {
       return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     }
 
-    // Function to update button visibility based on app installation status
+    // Update button visibility based on app installation status
     function updateButtons() {
       if (isAppInstalled()) {
         // App installed: hide download button, show enter button
@@ -218,7 +214,6 @@
     // On page load, check installation status and update buttons accordingly
     window.addEventListener('load', () => {
       updateButtons();
-      loadPosters();
     });
   </script>
 </body>
