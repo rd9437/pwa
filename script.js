@@ -1,3 +1,14 @@
+// script.js
+
+const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
+const BASE_URL = 'https://api.themoviedb.org/3/trending/movie/week';
+
+async function fetchPosters() {
+  const response = await fetch(`${BASE_URL}?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data.results;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const background = document.querySelector('.background');
   const posters = [];
