@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Neosteam</title>
+  <title>Neostream</title>
   <style>
     * {
       box-sizing: border-box;
@@ -122,7 +122,7 @@
     <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
     <div class="buttons">
       <a id="enterBtn" href="https://neostream.free.nf">Enter Neostream</a>
-      <a id="downloadBtn" style="display:none;">Download App</a>
+      <a id="downloadBtn" href="#">Download App</a>
     </div>
   </div>
 
@@ -132,14 +132,20 @@
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
     async function fetchPosters() {
-      const res = await fetch(`${BASE_URL}/trending/movie/week`, {
-        headers: {
-          Authorization: API_KEY,
-          accept: 'application/json'
-        }
-      });
-      const data = await res.json();
-      return data.results;
+      try {
+        const res = await fetch(`${BASE_URL}/trending/movie/week`, {
+          headers: {
+            Authorization: API_KEY,
+            accept: 'application/json'
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch posters');
+        const data = await res.json();
+        return data.results;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
     }
 
     async function loadPosters() {
@@ -153,7 +159,7 @@
         if (movie.poster_path) {
           const img = document.createElement('img');
           img.src = `${IMAGE_URL}${movie.poster_path}`;
-          img.alt = movie.title;
+          img.alt = movie.title || 'Movie Poster';
           grid.appendChild(img);
         }
       });
@@ -164,47 +170,56 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const enterBtn = document.getElementById('enterBtn');
 
-    // Check if app is installed
+    // Hide download button initially
+    downloadBtn.style.display = 'none';
+
+    // Function to check if the app is installed or not
     function isAppInstalled() {
       return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     }
 
-    // Update button visibility based on install status
+    // Function to update button visibility based on app installation status
     function updateButtons() {
       if (isAppInstalled()) {
-        // App installed: show only enter, hide download
+        // App installed: hide download button, show enter button
         downloadBtn.style.display = 'none';
         enterBtn.style.display = 'inline-block';
       } else {
-        // Not installed: download button only shows when prompt available (handled below)
+        // Not installed: show download button
+        downloadBtn.style.display = 'inline-block';
         enterBtn.style.display = 'inline-block';
       }
     }
 
+    // Show install button when beforeinstallprompt is fired
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
       deferredPrompt = e;
-
-      // Show the download button since install is possible
-      if (!isAppInstalled()) {
-        downloadBtn.style.display = 'inline-block';
-      }
+      updateButtons();  // Show the download button
     });
 
+    // Handle the install button click
     downloadBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        // Optionally handle outcome ('accepted' or 'dismissed')
-        deferredPrompt = null;
-        downloadBtn.style.display = 'none';  // Hide after prompting
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        downloadBtn.style.display = 'none';  // Hide the button once accepted
       }
+      deferredPrompt = null;
     });
 
-    // On page load, update buttons based on install status
-    updateButtons();
-    loadPosters();
+    // When app is installed, hide the download button
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      updateButtons();  // Hide the download button and show "Enter Neostream"
+    });
+
+    // On page load, check installation status and update buttons accordingly
+    window.addEventListener('load', () => {
+      updateButtons();
+      loadPosters();
+    });
   </script>
 </body>
 </html>
