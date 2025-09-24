@@ -121,8 +121,8 @@
     <h1>Stream Without the Clutter</h1>
     <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
     <div class="buttons">
-      <a href="https://neostream.free.nf" id="enterBtn">Enter Neostream</a>
-      <a href="#" id="downloadBtn">Download App</a>
+      <a id="enterBtn" href="https://neostream.free.nf">Enter Neostream</a>
+      <a id="downloadBtn" style="display:none;">Download App</a>
     </div>
   </div>
 
@@ -132,20 +132,14 @@
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
     async function fetchPosters() {
-      try {
-        const res = await fetch(`${BASE_URL}/trending/movie/week`, {
-          headers: {
-            Authorization: API_KEY,
-            accept: 'application/json'
-          }
-        });
-        if (!res.ok) throw new Error('Failed to fetch posters');
-        const data = await res.json();
-        return data.results;
-      } catch (error) {
-        console.error(error);
-        return [];
-      }
+      const res = await fetch(`${BASE_URL}/trending/movie/week`, {
+        headers: {
+          Authorization: API_KEY,
+          accept: 'application/json'
+        }
+      });
+      const data = await res.json();
+      return data.results;
     }
 
     async function loadPosters() {
@@ -159,57 +153,58 @@
         if (movie.poster_path) {
           const img = document.createElement('img');
           img.src = `${IMAGE_URL}${movie.poster_path}`;
-          img.alt = movie.title || 'Movie Poster';
+          img.alt = movie.title;
           grid.appendChild(img);
         }
       });
     }
 
-    loadPosters();
-
-    // PWA install prompt logic
+    // PWA install logic
     let deferredPrompt;
     const downloadBtn = document.getElementById('downloadBtn');
     const enterBtn = document.getElementById('enterBtn');
 
-    // Hide download button initially
-    downloadBtn.style.display = 'none';
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      downloadBtn.style.display = 'inline-block';
-      enterBtn.style.display = 'inline-block';  // Always show enter
-    });
-
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      downloadBtn.style.display = 'none';
-      enterBtn.style.display = 'inline-block';
-    });
-
-    // Check if app is already installed or in standalone mode
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      downloadBtn.style.display = 'none';
-      enterBtn.style.display = 'inline-block';
-    } else {
-      // If beforeinstallprompt didn't fire yet, show both buttons but download hidden
-      downloadBtn.style.display = 'none';
-      enterBtn.style.display = 'inline-block';
+    // Check if app is installed
+    function isAppInstalled() {
+      return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     }
 
-    downloadBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+    // Update button visibility based on install status
+    function updateButtons() {
+      if (isAppInstalled()) {
+        // App installed: show only enter, hide download
         downloadBtn.style.display = 'none';
+        enterBtn.style.display = 'inline-block';
       } else {
-        console.log('User dismissed the install prompt');
+        // Not installed: download button only shows when prompt available (handled below)
+        enterBtn.style.display = 'inline-block';
       }
-      deferredPrompt = null;
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Show the download button since install is possible
+      if (!isAppInstalled()) {
+        downloadBtn.style.display = 'inline-block';
+      }
     });
+
+    downloadBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        // Optionally handle outcome ('accepted' or 'dismissed')
+        deferredPrompt = null;
+        downloadBtn.style.display = 'none';  // Hide after prompting
+      }
+    });
+
+    // On page load, update buttons based on install status
+    updateButtons();
+    loadPosters();
   </script>
 </body>
 </html>
