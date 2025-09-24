@@ -2,18 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>eostream</title>
-  <meta property="og:description" content="Watch movies and webseries for free without sign up!" />
-  <meta property="og:title" content="Neostream" />
-  <meta property="og:image" content="https://neostream.free.nf/assets/og.png" />
-  <meta property="og:url" content="https://neostream.free.nf" />
-  <meta property="og:type" content="website" />
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-  <link rel="icon" href="https://neostream.free.nf/assets/logo-1.png" type="image/png" />
-  <link rel="manifest" href="/pwa/manifest.json" />
-  <meta name="theme-color" content="#6c47ff" />
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neostream</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #000;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 4px;
+      padding: 10px;
+      align-content: start;
+    }
+
+    .background img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: 6px;
+      animation: zoomInOut 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes zoomInOut {
+      from {
+        transform: scale(1);
+        opacity: 0.85;
+      }
+      to {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.9));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .overlay h1 {
+      font-size: 2.5rem;
+      margin: 10px 0;
+    }
+
+    .overlay p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .buttons a {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      background: #6c47ff;
+      border: 2px solid #6c47ff;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .buttons a:hover {
+      background: transparent;
+    }
+
+    @media (max-width: 768px) {
+      .overlay h1 {
+        font-size: 2rem;
+      }
+
+      .overlay p {
+        font-size: 1rem;
+      }
+
+      .background {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background" id="posterGrid"></div>
+
+  <div class="overlay">
+    <div class="tagline">Fasean • Free • Movies • TV • K-Drama</div>
+    <h1>Stream Without the Clutter</h1>
+    <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
+    <div class="buttons">
+      <a id="enterBtn" href="https://neostream.free.nf">Enter Neostream</a>
+      <a id="downloadBtn" href="#">Download App</a>
+    </div>
+</div>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -87,15 +198,102 @@
       });
     });
   </script>
-</head>
-<body>
-  <div class="background" id="posterGrid"></div>
-  <div class="overlay">
-    <h1>Neostream</h1>
-    <p>Stream Without the Clutter</p>
-    <div class="buttons">
-      <a href="https://neostream.free.nf">Enter Neostream</a>
-    </div>
   </div>
+
+  <script>
+    const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
+
+    async function fetchPosters() {
+      try {
+        const res = await fetch(`${BASE_URL}/trending/movie/week`, {
+          headers: {
+            Authorization: API_KEY,
+            accept: 'application/json'
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch posters');
+        const data = await res.json();
+        return data.results;
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+
+    async function loadPosters() {
+      const grid = document.getElementById('posterGrid');
+      const movies = await fetchPosters();
+
+      // Repeat posters to fill space better
+      const posters = [...movies, ...movies, ...movies];
+
+      posters.forEach(movie => {
+        if (movie.poster_path) {
+          const img = document.createElement('img');
+          img.src = `${IMAGE_URL}${movie.poster_path}`;
+          img.alt = movie.title || 'Movie Poster';
+          grid.appendChild(img);
+        }
+      });
+    }
+
+    // PWA install logic
+    let deferredPrompt;
+    const downloadBtn = document.getElementById('downloadBtn');
+    const enterBtn = document.getElementById('enterBtn');
+
+    // Hide download button initially
+    downloadBtn.style.display = 'none';
+
+    // Function to check if the app is installed or not
+    function isAppInstalled() {
+      return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    }
+
+    // Function to update button visibility based on app installation status
+    function updateButtons() {
+      if (isAppInstalled()) {
+        // App installed: hide download button, show enter button
+        downloadBtn.style.display = 'none';
+        enterBtn.style.display = 'inline-block';
+      } else {
+        // Not installed: show download button
+        downloadBtn.style.display = 'inline-block';
+        enterBtn.style.display = 'inline-block';
+      }
+    }
+
+    // Show install button when beforeinstallprompt is fired
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      updateButtons();  // Show the download button
+    });
+
+    // Handle the install button click
+    downloadBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        downloadBtn.style.display = 'none';  // Hide the button once accepted
+      }
+      deferredPrompt = null;
+    });
+
+    // When app is installed, hide the download button
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      updateButtons();  // Hide the download button and show "Enter Neostream"
+    });
+
+    // On page load, check installation status and update buttons accordingly
+    window.addEventListener('load', () => {
+      updateButtons();
+      loadPosters();
+    });
+  </script>
 </body>
 </html>
