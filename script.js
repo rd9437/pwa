@@ -66,10 +66,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // Create the button
   const installBtn = document.createElement('button');
   installBtn.id = 'installAppBtn';
-  installBtn.style.position = 'fixed';
-  installBtn.style.bottom = '20px';
-  installBtn.style.right = '20px';
-  installBtn.style.zIndex = '1000';
   installBtn.style.display = 'none';
   installBtn.style.padding = '12px 20px 12px 20px';
   installBtn.style.background = '#7b74c6'; // violet
@@ -81,10 +77,9 @@ window.addEventListener('DOMContentLoaded', () => {
   installBtn.style.fontWeight = '600';
   installBtn.style.letterSpacing = '0.5px';
   installBtn.style.cursor = 'pointer';
-  installBtn.style.position = 'fixed';
-  installBtn.style.display = 'none';
   installBtn.style.alignItems = 'center';
   installBtn.style.gap = '8px';
+  installBtn.style.marginLeft = '12px'; // space from Enter Neostream
 
   // Add text span
   const btnText = document.createElement('span');
@@ -114,8 +109,13 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   installBtn.appendChild(closeBtn);
 
-  // No need to set styles inline anymore, CSS handles it
-  document.body.appendChild(installBtn);
+  // Append the button to the .buttons div next to Enter Neostream
+  const buttonsDiv = document.querySelector('.buttons');
+  if (buttonsDiv) {
+    buttonsDiv.appendChild(installBtn);
+  } else {
+    document.body.appendChild(installBtn); // fallback
+  }
 
   let deferredPrompt;
 
