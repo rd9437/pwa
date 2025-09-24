@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6c47ff">
   <title>Neostream</title>
   <style>
     * {
@@ -127,80 +129,6 @@
 </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker
-          .register('/pwa/service-worker.js')
-          .then(function (registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-          })
-          .catch(function (err) {
-            console.log('ServiceWorker registration failed: ', err);
-          });
-      });
-    }
-  </script>
-
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const style = document.createElement('style');
-      style.textContent = `
-        #installAppBtn {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          z-index: 1000;
-          display: none;
-          padding: 8px 16px;
-          font-family: Poppins, "Comic Sans MS", sans-serif;
-          font-weight: 600;
-          letter-spacing: 0.5px;
-          cursor: pointer;
-          border-radius: 8px;
-          overflow: hidden;
-          text-transform: uppercase;
-          color: #fff;
-          font-size: 14px;
-          border: 2px solid #574a99;
-          background: #574a99;
-          box-shadow: 0 2px 8px rgba(123,116,198,0.3);
-          transition: background 0.3s ease;
-        }
-        #installAppBtn:hover {
-          background: #6a63b3;
-          border-color: #6a63b3;
-        }
-      `;
-      document.head.appendChild(style);
-
-      const installBtn = document.createElement('button');
-      installBtn.id = 'installAppBtn';
-      installBtn.style.display = 'none';
-      installBtn.textContent = 'Install App';
-      document.body.appendChild(installBtn);
-
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.style.display = 'block';
-      });
-
-      installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') {
-            installBtn.style.display = 'none';
-          }
-          deferredPrompt = null;
-        }
-      });
-    });
-  </script>
-  </div>
-
-  <script>
     const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
     const BASE_URL = 'https://api.themoviedb.org/3';
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
@@ -295,5 +223,6 @@
       loadPosters();
     });
   </script>
+  <script src="script.js" type="text/javascript"></script>
 </body>
 </html>
