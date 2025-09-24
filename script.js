@@ -1,13 +1,30 @@
 // Add Install App button to the DOM and handle PWA install prompt
 window.addEventListener('DOMContentLoaded', () => {
+  // Create the DEMO button
+  const demoBtn = document.createElement('button');
+  demoBtn.id = 'demoBtn';
+  demoBtn.textContent = 'DEMO';
+  demoBtn.style.padding = '12px 20px 12px 20px';
+  demoBtn.style.background = '#5bc0de'; // blue shade
+  demoBtn.style.color = '#fff';
+  demoBtn.style.border = '2px solid #5bc0de';
+  demoBtn.style.borderRadius = '8px';
+  demoBtn.style.boxShadow = '0 2px 8px rgba(91,192,222,0.3)';
+  demoBtn.style.fontFamily = 'Poppins, "Comic Sans MS", sans-serif';
+  demoBtn.style.fontWeight = '600';
+  demoBtn.style.letterSpacing = '0.5px';
+  demoBtn.style.cursor = 'pointer';
+  demoBtn.style.alignItems = 'center';
+  demoBtn.style.gap = '8px';
+  demoBtn.style.marginLeft = '12px'; // space from Install App
+  // Add a simple click handler (customize as needed)
+  demoBtn.addEventListener('click', () => {
+    alert('Demo button clicked!');
+  });
   // Inject CSS for shiny animation
   const style = document.createElement('style');
   style.textContent = `
     #installAppBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
       display: none;
       padding: 8px 16px;
       font-family: Poppins, "Comic Sans MS", sans-serif;
@@ -22,9 +39,6 @@ window.addEventListener('DOMContentLoaded', () => {
       border: 2px solid #574a99;
       background: #574a99;
       box-shadow: 0 2px 8px rgba(123,116,198,0.3);
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
       transition: background 0.3s ease;
     }
 
@@ -113,8 +127,10 @@ window.addEventListener('DOMContentLoaded', () => {
   const buttonsDiv = document.querySelector('.buttons');
   if (buttonsDiv) {
     buttonsDiv.appendChild(installBtn);
+    buttonsDiv.appendChild(demoBtn);
   } else {
     document.body.appendChild(installBtn); // fallback
+    document.body.appendChild(demoBtn);
   }
 
   let deferredPrompt;
