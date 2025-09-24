@@ -19,9 +19,11 @@ window.addEventListener('DOMContentLoaded', () => {
       background: #574a99;
       box-shadow: 0 2px 8px rgba(123,116,198,0.3);
       transition: background 0.3s ease;
+      position: relative;
     }
 
-    #installAppBtn::before {
+    #installAppBtn::before,
+    #downloadBtn::before {
       content: '';
       position: absolute;
       top: 0;
@@ -36,8 +38,13 @@ window.addEventListener('DOMContentLoaded', () => {
       );
       transform: skewX(-20deg);
       animation: shine 2s infinite;
-      pointer-events: none; /* so clicks go through */
+      pointer-events: none;
       border-radius: 8px;
+    }
+
+    #downloadBtn {
+      position: relative;
+      overflow: hidden;
     }
 
     @keyframes shine {
@@ -50,8 +57,12 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     #installAppBtn:hover {
-      background: #6a63b3; /* Slightly darker violet on hover */
+      background: #6a63b3;
       border-color: #6a63b3;
+    }
+    #downloadBtn:hover {
+      background: #4e2bbd;
+      border-color: #4e2bbd;
     }
   `;
   document.head.appendChild(style);
