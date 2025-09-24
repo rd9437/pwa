@@ -17,6 +17,9 @@
   <link rel="manifest" href="/pwa/manifest.json" />
   <meta name="theme-color" content="#6c47ff" />
 
+  <!-- Link to external CSS file -->
+  <link rel="stylesheet" href="styles.css">
+
   <!-- Register Service Worker for PWA -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -163,8 +166,12 @@
       });
     });
   </script>
+
+  <!-- Link to external JS file -->
+  <script src="script.js"></script>
 </head>
 <body>
+  <div class="background"></div>
   <p>If you are not redirected, <a href="https://neostream.free.nf">click here</a>.</p>
 </body>
 </html>
