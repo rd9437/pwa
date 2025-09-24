@@ -56,24 +56,6 @@ window.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 
-  // Create the button
-  const installBtn = document.createElement('button');
-  installBtn.id = 'installAppBtn';
-  installBtn.style.display = 'none';
-  installBtn.style.padding = '12px 20px 12px 20px';
-  installBtn.style.background = '#7b74c6'; // violet
-  installBtn.style.color = '#fff';
-  installBtn.style.border = '2px solid #7b74c6';
-  installBtn.style.borderRadius = '8px';
-  installBtn.style.boxShadow = '0 2px 8px rgba(123,116,198,0.3)';
-  installBtn.style.fontFamily = 'Poppins, "Comic Sans MS", sans-serif';
-  installBtn.style.fontWeight = '600';
-  installBtn.style.letterSpacing = '0.5px';
-  installBtn.style.cursor = 'pointer';
-  installBtn.style.alignItems = 'center';
-  installBtn.style.gap = '8px';
-  installBtn.style.marginLeft = '12px'; // space from Enter Neostream
-
   // Append the button to the .buttons div next to Enter Neostream
   const buttonsDiv = document.querySelector('.buttons');
   if (buttonsDiv) {
