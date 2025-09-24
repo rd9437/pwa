@@ -2,219 +2,169 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ntream</title>
-  <style>
-    * {
-      box-sizing: border-box;
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Neostream</title>
+  <meta property="og:description" content="Watch movies and webseries for free without sign up!" />
+  <meta property="og:title" content="Neostream" />
+  <meta property="og:image" content="https://neostream.free.nf/assets/og.png" />
+  <meta property="og:url" content="https://neostream.free.nf" />
+  <meta property="og:type" content="website" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+  <link rel="icon" href="https://neostream.free.nf/assets/logo-1.png" type="image/png" />
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/mysite/manifest.json" />
+  <meta name="theme-color" content="#6c47ff" />
+
+  <!-- Register Service Worker for PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker
+          .register('/mysite/service-worker.js')
+          .then(function (registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(function (err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
     }
-
-    body, html {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background-color: #000;
-    }
-
-    .background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      z-index: -1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 4px;
-      padding: 10px;
-      align-content: start;
-    }
-
-    .background img {
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-      border-radius: 6px;
-      animation: zoomInOut 6s ease-in-out infinite alternate;
-    }
-
-    @keyframes zoomInOut {
-      from {
-        transform: scale(1);
-        opacity: 0.85;
-      }
-      to {
-        transform: scale(1.05);
-        opacity: 1;
-      }
-    }
-
-    .overlay {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-      color: white;
-    }
-
-    .overlay h1 {
-      font-size: 2.5rem;
-      margin: 10px 0;
-    }
-
-    .overlay p {
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin-bottom: 30px;
-    }
-
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-    }
-
-    .buttons a {
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
-      color: white;
-      background: #6c47ff;
-      border: 2px solid #6c47ff;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-
-    .buttons a:hover {
-      background: transparent;
-    }
-
-    @media (max-width: 768px) {
-      .overlay h1 {
-        font-size: 2rem;
-      }
-
-      .overlay p {
-        font-size: 1rem;
-      }
-
-      .background {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="background" id="posterGrid"></div>
-
-  <div class="overlay">
-    <div class="tagline">Fast • Clean • Free • Movies • TV • K-Drama</div>
-    <h1>Stream Without the Clutter</h1>
-    <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
-    <div class="buttons">
-      <a id="enterBtn" href="https://neostream.free.nf">Enter Neostream</a>
-      <a id="downloadBtn" href="#">Download App</a>
-    </div>
-  </div>
+  </script>
 
   <script>
-    const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
-    const BASE_URL = 'https://api.themoviedb.org/3';
-    const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
+    // Add Install App button to the DOM and handle PWA install prompt
+    window.addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style');
+      style.textContent = `
+        #installAppBtn {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          display: none;
+          padding: 8px 16px;
+          font-family: Poppins, "Comic Sans MS", sans-serif;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+          cursor: pointer;
+          border-radius: 8px;
+          overflow: hidden;
+          text-transform: uppercase;
+          color: #fff;
+          font-size: 14px;
+          border: 2px solid #574a99;
+          background: #574a99;
+          box-shadow: 0 2px 8px rgba(123,116,198,0.3);
+          transition: background 0.3s ease;
+        }
 
-    async function fetchPosters() {
-      const res = await fetch(`${BASE_URL}/trending/movie/week`, {
-        headers: {
-          Authorization: API_KEY,
-          accept: 'application/json'
+        #installAppBtn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -75%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: skewX(-20deg);
+          animation: shine 2s infinite;
+          pointer-events: none;
+          border-radius: 8px;
+        }
+
+        @keyframes shine {
+          0% {
+            left: -75%;
+          }
+          100% {
+            left: 125%;
+          }
+        }
+
+        #installAppBtn:hover {
+          background: #6a63b3;
+          border-color: #6a63b3;
+        }
+      `;
+      document.head.appendChild(style);
+
+      const installBtn = document.createElement('button');
+      installBtn.id = 'installAppBtn';
+      installBtn.style.position = 'fixed';
+      installBtn.style.bottom = '20px';
+      installBtn.style.right = '20px';
+      installBtn.style.zIndex = '1000';
+      installBtn.style.display = 'none';
+      installBtn.style.padding = '12px 20px';
+      installBtn.style.background = '#7b74c6';
+      installBtn.style.color = '#fff';
+      installBtn.style.border = '2px solid #7b74c6';
+      installBtn.style.borderRadius = '8px';
+      installBtn.style.boxShadow = '0 2px 8px rgba(123,116,198,0.3)';
+      installBtn.style.fontFamily = 'Poppins, "Comic Sans MS", sans-serif';
+      installBtn.style.fontWeight = '600';
+      installBtn.style.letterSpacing = '0.5px';
+      installBtn.style.cursor = 'pointer';
+      installBtn.style.alignItems = 'center';
+      installBtn.style.gap = '8px';
+
+      const btnText = document.createElement('span');
+      btnText.textContent = 'Install App';
+      installBtn.appendChild(btnText);
+
+      const closeBtn = document.createElement('span');
+      closeBtn.textContent = '✕';
+      closeBtn.style.fontSize = '13px';
+      closeBtn.style.marginLeft = '10px';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.background = 'rgba(0,0,0,0.12)';
+      closeBtn.style.borderRadius = '50%';
+      closeBtn.style.width = '18px';
+      closeBtn.style.height = '18px';
+      closeBtn.style.display = 'inline-flex';
+      closeBtn.style.alignItems = 'center';
+      closeBtn.style.justifyContent = 'center';
+      closeBtn.style.color = '#fff';
+      closeBtn.style.position = 'relative';
+      closeBtn.style.top = '-1px';
+      closeBtn.setAttribute('title', 'Dismiss');
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        installBtn.style.display = 'none';
+      });
+      installBtn.appendChild(closeBtn);
+
+      document.body.appendChild(installBtn);
+
+      let deferredPrompt;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            installBtn.style.display = 'none';
+          }
+          deferredPrompt = null;
         }
       });
-      const data = await res.json();
-      return data.results;
-    }
-
-    async function loadPosters() {
-      const grid = document.getElementById('posterGrid');
-      const movies = await fetchPosters();
-
-      // Repeat posters to fill space better
-      const posters = [...movies, ...movies, ...movies];
-
-      posters.forEach(movie => {
-        if (movie.poster_path) {
-          const img = document.createElement('img');
-          img.src = `${IMAGE_URL}${movie.poster_path}`;
-          img.alt = movie.title || 'Movie Poster';
-          grid.appendChild(img);
-        }
-      });
-    }
-
-    loadPosters();
-
-    // PWA install logic
-    let deferredPrompt;
-    const downloadBtn = document.getElementById('downloadBtn');
-    const enterBtn = document.getElementById('enterBtn');
-
-    // Hide download button initially
-    downloadBtn.style.display = 'none';
-
-    // Check if the app is already installed
-    function isAppInstalled() {
-      return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
-    }
-
-    // Update button visibility based on app installation status
-    function updateButtons() {
-      if (isAppInstalled()) {
-        // App installed: hide download button, show enter button
-        downloadBtn.style.display = 'none';
-        enterBtn.style.display = 'inline-block';
-      } else {
-        // Not installed: show download button
-        downloadBtn.style.display = 'inline-block';
-        enterBtn.style.display = 'inline-block';
-      }
-    }
-
-    // Show install button when beforeinstallprompt is fired
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      updateButtons();  // Show the download button
-    });
-
-    // Handle the install button click
-    downloadBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        downloadBtn.style.display = 'none';  // Hide the button once accepted
-      }
-      deferredPrompt = null;
-    });
-
-    // When app is installed, hide the download button
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      updateButtons();  // Hide the download button and show "Enter Neostream"
-    });
-
-    // On page load, check installation status and update buttons accordingly
-    window.addEventListener('load', () => {
-      updateButtons();
     });
   </script>
+</head>
+<body>
+  <p>If you are not redirected, <a href="https://neostream.free.nf">click here</a>.</p>
 </body>
 </html>
