@@ -1,5 +1,3 @@
-/* styles.css */
-
 /* Full viewport background setup */
 body {
   margin: 0;
@@ -15,44 +13,75 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation: zoomEffect 30s infinite alternate;
-  transition: background-image 1s ease-in-out;
-  filter: brightness(0.5);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 4px;
+  padding: 10px;
+  align-items: start;
 }
 
-/* Zoom effect */
-@keyframes zoomEffect {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.1);
-  }
-}
-
-/* Dark gradient overlay */
-.background::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+.background img {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+  height: auto;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Optional mouse parallax effect */
-body {
-  perspective: 1px;
-  overflow-x: hidden;
-  overflow-y: auto;
+/* Overlay text */
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 100;
+  color: white;
 }
 
-.parallax {
-  transform-style: preserve-3d;
-  transform: translateZ(-2px) scale(3);
-  height: 100%;
+.overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.overlay p {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin-bottom: 30px;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.buttons a {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+  background: #6c47ff;
+  border: 2px solid #6c47ff;
+  transition: 0.3s;
+}
+
+.buttons a:hover {
+  background: transparent;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .overlay h1 {
+    font-size: 2rem;
+  }
+
+  .overlay p {
+    font-size: 1rem;
+  }
+
+  .background {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
 }
