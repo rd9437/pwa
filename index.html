@@ -6,7 +6,15 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#6c47ff">
   <title>Neostream</title>
-  <link rel="icon" href="assets\logo-1.png" type="image/png" />
+  <link rel="icon" href="assets/logo-1.png" type="image/png" />
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Neostream - Stream Without the Clutter" />
+  <meta property="og:description" content="Fast • Free • Movies • TV • Web series. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss." />
+  <meta property="og:image" content="assets/og.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com" />
+
   <style>
     * {
       box-sizing: border-box;
@@ -86,6 +94,9 @@
     }
 
     .buttons a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 12px 24px;
       border-radius: 6px;
       font-weight: bold;
@@ -95,6 +106,14 @@
       border: 2px solid #6c47ff;
       transition: 0.3s;
       cursor: pointer;
+      user-select: none;
+      font-size: 1rem;
+    }
+
+    .buttons a svg {
+      fill: white;
+      width: 18px;
+      height: 18px;
     }
 
     .buttons a:hover {
@@ -124,16 +143,24 @@
     <h1>Stream Without the Clutter</h1>
     <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
     <div class="buttons">
-      <a id="enterBtn" href="https://neostream.free.nf">Enter Neostream</a>
-      <a id="downloadBtn" href="#">Download App</a>
+      <a id="enterBtn" href="https://neostream.free.nf" target="_blank" rel="noopener noreferrer">
+        <!-- Right arrow icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 17l5-5-5-5v10z"/></svg>
+        Enter Neostream
+      </a>
+      <a id="downloadBtn" href="#" style="display:none;">
+        <!-- Download arrow icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 20h14v-2H5v2zm7-18v12m0 0l-4-4m4 4l4-4"/></svg>
+        Download App
+      </a>
     </div>
-</div>
+  </div>
 
   <script>
     const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
     const BASE_URL = 'https://api.themoviedb.org/3';
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
-    
+
     async function fetchPosters() {
       try {
         const res = await fetch(`${BASE_URL}/trending/movie/week`, {
@@ -150,14 +177,14 @@
         return [];
       }
     }
-    
+
     async function loadPosters() {
       const grid = document.getElementById('posterGrid');
       const movies = await fetchPosters();
-    
+
       // Repeat posters to fill space better
       const posters = [...movies, ...movies, ...movies];
-    
+
       posters.forEach(movie => {
         if (movie.poster_path) {
           const img = document.createElement('img');
@@ -167,47 +194,80 @@
         }
       });
     }
-    
+
     // PWA install logic
     let deferredPrompt;
     const downloadBtn = document.getElementById('downloadBtn');
     const enterBtn = document.getElementById('enterBtn');
-    
-    // Hide download button initially
-    downloadBtn.style.display = 'none';
-    
+
     // Detect iOS
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    
+
     // Check if app running standalone (iOS & others)
     const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
-    
+
     // Check if app installed (including Android PWA standalone mode)
     function isAppInstalled() {
       return window.matchMedia('(display-mode: standalone)').matches || isInStandaloneMode();
     }
-    
-    // Show or hide buttons based on install status
+
+    // Update buttons & text based on app install status
     function updateButtons() {
       if (isAppInstalled()) {
-        // App installed: hide download button, show enter button
+        // App installed: show only "Open App" button, hide download
         downloadBtn.style.display = 'none';
-        enterBtn.style.display = 'inline-block';
+        enterBtn.style.display = 'inline-flex';
+        enterBtn.textContent = 'Open App';
+        // Add icon back after text change
+        enterBtn.prepend(createRightArrowIcon());
       } else {
-        // App not installed: show both buttons on Android, or just enter button on iOS (downloadBtn hidden)
+        // Not installed
+        enterBtn.style.display = 'inline-flex';
+        enterBtn.textContent = 'Enter Neostream';
+        enterBtn.prepend(createRightArrowIcon());
+
         if (isIOS) {
-          downloadBtn.style.display = 'none'; // iOS no prompt, hide download button
+          downloadBtn.style.display = 'none'; // iOS no prompt
         } else {
-          downloadBtn.style.display = 'inline-block'; // Android and others with prompt support
+          downloadBtn.style.display = 'inline-flex';
+          downloadBtn.textContent = 'Install App';
+          downloadBtn.prepend(createDownloadIcon());
         }
-        enterBtn.style.display = 'inline-block';
       }
     }
-    
+
+    // Create icons to avoid duplication
+    function createRightArrowIcon() {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("width", "18");
+      svg.setAttribute("height", "18");
+      svg.style.fill = "white";
+      svg.style.marginRight = "8px";
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", "M10 17l5-5-5-5v10z");
+      svg.appendChild(path);
+      return svg;
+    }
+
+    function createDownloadIcon() {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("width", "18");
+      svg.setAttribute("height", "18");
+      svg.style.fill = "white";
+      svg.style.marginRight = "8px";
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", "M5 20h14v-2H5v2zm7-18v12m0 0l-4-4m4 4l4-4");
+      svg.appendChild(path);
+      return svg;
+    }
+
     // Show iOS install banner for manual install instructions
     function showIOSInstallBanner() {
       if (isIOS && !isAppInstalled()) {
-        // Only add banner if not already present
         if (!document.getElementById('iosInstallBanner')) {
           const banner = document.createElement('div');
           banner.id = 'iosInstallBanner';
@@ -228,26 +288,25 @@
             <button id="closeIosBanner" style="margin-top:8px; background: rgba(255,255,255,0.3); border:none; color:#fff; padding:4px 8px; border-radius:5px; cursor:pointer;">Got it</button>
           `;
           document.body.appendChild(banner);
-    
+
           document.getElementById('closeIosBanner').addEventListener('click', () => {
             banner.style.display = 'none';
           });
         }
       } else {
-        // Remove banner if app is installed or not iOS
         const existingBanner = document.getElementById('iosInstallBanner');
         if (existingBanner) existingBanner.remove();
       }
     }
-    
+
     // Listen for beforeinstallprompt (Android)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       updateButtons();
-      showIOSInstallBanner(); // in case iOS banner needs hiding
+      showIOSInstallBanner();
     });
-    
+
     // Handle install button click (Android)
     downloadBtn.addEventListener('click', async () => {
       if (!deferredPrompt) return;
@@ -258,21 +317,20 @@
       }
       deferredPrompt = null;
     });
-    
+
     // When app is installed (all platforms)
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
       updateButtons();
       showIOSInstallBanner();
     });
-    
+
     // On load
     window.addEventListener('load', () => {
       updateButtons();
       showIOSInstallBanner();
       loadPosters();
     });
-
   </script>
   <script src="script.js" type="text/javascript"></script>
 </body>
