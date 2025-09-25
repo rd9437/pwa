@@ -110,12 +110,6 @@
       font-size: 1rem;
     }
 
-    .buttons a svg {
-      fill: white;
-      width: 18px;
-      height: 18px;
-    }
-
     .buttons a:hover {
       background: transparent;
     }
@@ -133,6 +127,7 @@
         grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       }
     }
+
     @media (max-width: 480px) {
       .buttons a {
         width: 100%; 
@@ -140,7 +135,6 @@
         font-size: 1.1rem;
       }
     }
-
   </style>
 </head>
 <body>
@@ -152,12 +146,10 @@
     <p>Neostream focuses on speed, simplicity, and choice. Find shows quickly, switch servers on the fly, and pick up right where you left off — no fuss.</p>
     <div class="buttons">
       <a id="enterBtn" href="https://neostream.free.nf" target="_blank" rel="noopener noreferrer">
-        <!-- Right arrow icon -->
         Enter Neostream
       </a>
       <a id="downloadBtn" href="#" style="display:none;">
-        <!-- Download arrow icon -->
-        Download App
+        Install App
       </a>
     </div>
   </div>
@@ -187,8 +179,6 @@
     async function loadPosters() {
       const grid = document.getElementById('posterGrid');
       const movies = await fetchPosters();
-
-      // Repeat posters to fill space better
       const posters = [...movies, ...movies, ...movies];
 
       posters.forEach(movie => {
@@ -201,77 +191,34 @@
       });
     }
 
-    // PWA install logic
     let deferredPrompt;
     const downloadBtn = document.getElementById('downloadBtn');
     const enterBtn = document.getElementById('enterBtn');
 
-    // Detect iOS
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-    // Check if app running standalone (iOS & others)
     const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
-
-    // Check if app installed (including Android PWA standalone mode)
     function isAppInstalled() {
       return window.matchMedia('(display-mode: standalone)').matches || isInStandaloneMode();
     }
 
-    // Update buttons & text based on app install status
     function updateButtons() {
       if (isAppInstalled()) {
-        // App installed: show only "Open App" button, hide download
         downloadBtn.style.display = 'none';
         enterBtn.style.display = 'inline-flex';
         enterBtn.textContent = 'Open App';
-        // Add icon back after text change
-        enterBtn.prepend(createRightArrowIcon());
       } else {
-        // Not installed
         enterBtn.style.display = 'inline-flex';
         enterBtn.textContent = 'Enter Neostream';
-        enterBtn.prepend(createRightArrowIcon());
 
         if (isIOS) {
-          downloadBtn.style.display = 'none'; // iOS no prompt
+          downloadBtn.style.display = 'none';
         } else {
           downloadBtn.style.display = 'inline-flex';
           downloadBtn.textContent = 'Install App';
-          downloadBtn.prepend(createDownloadIcon());
         }
       }
     }
 
-    // Create icons to avoid duplication
-    function createRightArrowIcon() {
-      const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("width", "18");
-      svg.setAttribute("height", "18");
-      svg.style.fill = "white";
-      svg.style.marginRight = "8px";
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", "M10 17l5-5-5-5v10z");
-      svg.appendChild(path);
-      return svg;
-    }
-
-    function createDownloadIcon() {
-      const svgNS = "http://www.w3.org/2000/svg";
-      const svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("width", "18");
-      svg.setAttribute("height", "18");
-      svg.style.fill = "white";
-      svg.style.marginRight = "8px";
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", "M5 20h14v-2H5v2zm7-18v12m0 0l-4-4m4 4l4-4");
-      svg.appendChild(path);
-      return svg;
-    }
-
-    // Show iOS install banner for manual install instructions
     function showIOSInstallBanner() {
       if (isIOS && !isAppInstalled()) {
         if (!document.getElementById('iosInstallBanner')) {
@@ -305,7 +252,6 @@
       }
     }
 
-    // Listen for beforeinstallprompt (Android)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -313,7 +259,6 @@
       showIOSInstallBanner();
     });
 
-    // Handle install button click (Android)
     downloadBtn.addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
@@ -324,20 +269,49 @@
       deferredPrompt = null;
     });
 
-    // When app is installed (all platforms)
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
       updateButtons();
       showIOSInstallBanner();
     });
 
-    // On load
-    window.addEventListener('load', () => {
+    async function isIncognitoMode() {
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const { quota } = await navigator.storage.estimate();
+        return quota < 120000000;
+      }
+      return false;
+    }
+
+    function showIncognitoWarning() {
+      const warning = document.createElement('div');
+      warning.id = 'incognitoWarning';
+      warning.style.position = 'fixed';
+      warning.style.bottom = '20px';
+      warning.style.left = '20px';
+      warning.style.background = '#ff4444';
+      warning.style.color = '#fff';
+      warning.style.padding = '12px 16px';
+      warning.style.borderRadius = '8px';
+      warning.style.fontFamily = 'Poppins, sans-serif';
+      warning.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+      warning.style.zIndex = '9999';
+      warning.style.maxWidth = '300px';
+      warning.style.fontSize = '14px';
+      warning.textContent = 'Installing the app is not available in Incognito Mode.';
+      document.body.appendChild(warning);
+      setTimeout(() => warning.remove(), 7000);
+    }
+
+    window.addEventListener('load', async () => {
       updateButtons();
       showIOSInstallBanner();
       loadPosters();
+      const incognito = await isIncognitoMode();
+      if (incognito) {
+        showIncognitoWarning();
+      }
     });
   </script>
-  <script src="script.js" type="text/javascript"></script>
 </body>
 </html>
