@@ -132,7 +132,7 @@
     const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
     const BASE_URL = 'https://api.themoviedb.org/3';
     const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
-
+    
     async function fetchPosters() {
       try {
         const res = await fetch(`${BASE_URL}/trending/movie/week`, {
@@ -149,14 +149,14 @@
         return [];
       }
     }
-
+    
     async function loadPosters() {
       const grid = document.getElementById('posterGrid');
       const movies = await fetchPosters();
-
+    
       // Repeat posters to fill space better
       const posters = [...movies, ...movies, ...movies];
-
+    
       posters.forEach(movie => {
         if (movie.poster_path) {
           const img = document.createElement('img');
@@ -166,62 +166,112 @@
         }
       });
     }
-
+    
     // PWA install logic
     let deferredPrompt;
     const downloadBtn = document.getElementById('downloadBtn');
     const enterBtn = document.getElementById('enterBtn');
-
+    
     // Hide download button initially
     downloadBtn.style.display = 'none';
-
-    // Function to check if the app is installed or not
+    
+    // Detect iOS
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    
+    // Check if app running standalone (iOS & others)
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
+    
+    // Check if app installed (including Android PWA standalone mode)
     function isAppInstalled() {
-      return (window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+      return window.matchMedia('(display-mode: standalone)').matches || isInStandaloneMode();
     }
-
-    // Function to update button visibility based on app installation status
+    
+    // Show or hide buttons based on install status
     function updateButtons() {
       if (isAppInstalled()) {
         // App installed: hide download button, show enter button
         downloadBtn.style.display = 'none';
         enterBtn.style.display = 'inline-block';
       } else {
-        // Not installed: show download button
-        downloadBtn.style.display = 'inline-block';
+        // App not installed: show both buttons on Android, or just enter button on iOS (downloadBtn hidden)
+        if (isIOS) {
+          downloadBtn.style.display = 'none'; // iOS no prompt, hide download button
+        } else {
+          downloadBtn.style.display = 'inline-block'; // Android and others with prompt support
+        }
         enterBtn.style.display = 'inline-block';
       }
     }
-
-    // Show install button when beforeinstallprompt is fired
+    
+    // Show iOS install banner for manual install instructions
+    function showIOSInstallBanner() {
+      if (isIOS && !isAppInstalled()) {
+        // Only add banner if not already present
+        if (!document.getElementById('iosInstallBanner')) {
+          const banner = document.createElement('div');
+          banner.id = 'iosInstallBanner';
+          banner.style.position = 'fixed';
+          banner.style.bottom = '80px';
+          banner.style.right = '20px';
+          banner.style.background = '#6c47ff';
+          banner.style.color = 'white';
+          banner.style.padding = '12px 16px';
+          banner.style.borderRadius = '8px';
+          banner.style.boxShadow = '0 2px 8px rgba(108, 71, 255, 0.5)';
+          banner.style.fontFamily = 'Poppins, sans-serif';
+          banner.style.maxWidth = '280px';
+          banner.style.zIndex = '1000';
+          banner.style.fontSize = '14px';
+          banner.innerHTML = `
+            To install Neostream, tap the <strong>Share</strong> icon and then <strong>Add to Home Screen</strong>.
+            <button id="closeIosBanner" style="margin-top:8px; background: rgba(255,255,255,0.3); border:none; color:#fff; padding:4px 8px; border-radius:5px; cursor:pointer;">Got it</button>
+          `;
+          document.body.appendChild(banner);
+    
+          document.getElementById('closeIosBanner').addEventListener('click', () => {
+            banner.style.display = 'none';
+          });
+        }
+      } else {
+        // Remove banner if app is installed or not iOS
+        const existingBanner = document.getElementById('iosInstallBanner');
+        if (existingBanner) existingBanner.remove();
+      }
+    }
+    
+    // Listen for beforeinstallprompt (Android)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      updateButtons();  // Show the download button
+      updateButtons();
+      showIOSInstallBanner(); // in case iOS banner needs hiding
     });
-
-    // Handle the install button click
+    
+    // Handle install button click (Android)
     downloadBtn.addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        downloadBtn.style.display = 'none';  // Hide the button once accepted
+        downloadBtn.style.display = 'none';
       }
       deferredPrompt = null;
     });
-
-    // When app is installed, hide the download button
+    
+    // When app is installed (all platforms)
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
-      updateButtons();  // Hide the download button and show "Enter Neostream"
+      updateButtons();
+      showIOSInstallBanner();
     });
-
-    // On page load, check installation status and update buttons accordingly
+    
+    // On load
     window.addEventListener('load', () => {
       updateButtons();
+      showIOSInstallBanner();
       loadPosters();
     });
+
   </script>
   <script src="script.js" type="text/javascript"></script>
 </body>
