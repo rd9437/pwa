@@ -34,84 +34,90 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      z-index: -1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 4px;
-      padding: 10px;
-      align-content: start;
+      z-index: 0;
+      pointer-events: none;
     }
-
-    .background img {
-      width: 100%;
-      height: auto;
+    .poster-float {
+      position: absolute;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      width: 120px;
+      height: 120px;
       object-fit: cover;
-      border-radius: 6px;
-      animation: zoomInOut 6s ease-in-out infinite alternate;
+      transition: transform 1.5s cubic-bezier(.4,0,.2,1), opacity 1.5s;
+      opacity: 0.95;
+      background: #222;
+      z-index: 0;
+      animation: floatPoster 8s infinite alternate;
     }
-
-    @keyframes zoomInOut {
-      from {
-        transform: scale(1);
-        opacity: 0.85;
-      }
-      to {
-        transform: scale(1.05);
-        opacity: 1;
-      }
+    @keyframes floatPoster {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-30px) scale(1.07); }
     }
 
     .overlay {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.9));
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 20px;
+      padding: 40px 20px 0 20px;
       color: white;
     }
-
     .overlay h1 {
-      font-size: 2.5rem;
-      margin: 10px 0;
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin: 32px 0 18px 0;
+      letter-spacing: -2px;
+      line-height: 1.1;
     }
-
     .overlay p {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       max-width: 600px;
-      margin-bottom: 30px;
+      margin-bottom: 36px;
+      color: #d1d1d1;
+      font-weight: 500;
     }
 
     .buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 18px;
       justify-content: center;
+      margin-bottom: 32px;
     }
-
     .buttons a {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: bold;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-weight: 700;
       text-decoration: none;
-      color: white;
-      background: #6c47ff;
-      border: 2px solid #6c47ff;
-      transition: 0.3s;
-      cursor: pointer;
       user-select: none;
-      font-size: 1rem;
+      font-size: 1.15rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      border: none;
+      transition: background 0.2s, color 0.2s;
     }
-
-    .buttons a:hover {
-      background: transparent;
+    #enterBtn {
+      background: #222;
+      color: #fff;
+    }
+    #enterBtn:hover {
+      background: #111;
+      color: #fff;
+    }
+    #downloadBtn {
+      background: #fff;
+      color: #111;
+    }
+    #downloadBtn:hover {
+      background: #eaeaea;
+      color: #111;
     }
 
     @media (max-width: 768px) {
@@ -138,7 +144,7 @@
   </style>
 </head>
 <body>
-  <div class="background" id="posterGrid"></div>
+  <div class="background" id="posterFloatGrid"></div>
 
   <div class="overlay">
     <div class="tagline">Fast • Free • Movies • TV • Web series</div>
@@ -177,15 +183,41 @@
     }
 
     async function loadPosters() {
-      const grid = document.getElementById('posterGrid');
+      const grid = document.getElementById('posterFloatGrid');
       const movies = await fetchPosters();
-      const posters = [...movies, ...movies, ...movies];
-
-      posters.forEach(movie => {
+      let posters = movies;
+      if (movies.length > 10) {
+        posters = movies.sort(() => 0.5 - Math.random()).slice(0, 10);
+      }
+      // Store positions to avoid overlap
+      const positions = [];
+      const minGapVh = 15; // minimum vertical gap
+      const minGapVw = 10; // minimum horizontal gap
+      posters.forEach((movie, i) => {
         if (movie.poster_path) {
+          let tries = 0;
+          let top, left, side;
+          do {
+            side = i % 2 === 0 ? 'left' : 'right';
+            top = Math.random() * 60 + 10; // 10vh to 70vh
+            if (side === 'left') {
+              left = Math.random() * 18 + 2; // 2vw to 20vw
+            } else {
+              left = Math.random() * 18 + 78; // 78vw to 96vw
+            }
+            tries++;
+          } while (
+            positions.some(pos => Math.abs(pos.top - top) < minGapVh && Math.abs(pos.left - left) < minGapVw)
+            && tries < 20
+          );
+          positions.push({ top, left });
           const img = document.createElement('img');
           img.src = `${IMAGE_URL}${movie.poster_path}`;
           img.alt = movie.title || 'Movie Poster';
+          img.className = 'poster-float';
+          img.style.top = `${top}vh`;
+          img.style.left = `${left}vw`;
+          img.style.zIndex = 0;
           grid.appendChild(img);
         }
       });
